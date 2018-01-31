@@ -202,7 +202,6 @@ let generateRandomUserRides = (cityCoordinates) => {
   let bulk = [];
     
     for (var daysAgo = 105; daysAgo > 90; daysAgo--) {
-      debugger;
       let timeIntervals = timeIntervalsVolume()
 
       for(var times in timeIntervals) {
@@ -238,13 +237,13 @@ var fields = ['userId', 'pickupLocationLat', 'pickupLocationLong', 'dropOffLocat
               'surgeMultiplier', 'price', 'priceTimestamp']
 
 // To convert into CSV format
-var csv = json2csv({data: inserts, fields: fields });
+// var csv = json2csv({data: inserts, fields: fields });
 
-// Write the converted CSV to file
-fs.writeFile('./fakeData5.csv', csv, (err) => {
-  if (err) { console.log('Error', err )};
-  console.log('Successful CSV Write');
-})
+// // Write the converted CSV to file
+// fs.writeFile('./fakeData5.csv', csv, (err) => {
+//   if (err) { console.log('Error', err )};
+//   console.log('Successful CSV Write');
+// })
 
 /* ======= Logic for future functionality potentially ====================================================================== */
 // let convertEventLogDataTypeOne = (eventObject) => {
