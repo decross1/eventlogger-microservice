@@ -1,0 +1,25 @@
+{
+  "name": "eventloggerservice",
+  "version": "1.0.0",
+  "description": "SOA Capstone Folder for Event Logger Service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server/index.js"
+  },
+  "author": "Derrick Cross",
+  "license": "ISC",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "cassandra-driver": "^3.3.0",
+    "cities": "^1.1.2",
+    "csv-2-json": "^0.1.6",
+    "d3-fetch": "^1.0.1",
+    "faker": "^4.1.0",
+    "json2csv": "^3.11.5",
+    "koa": "^2.4.1",
+    "moment": "^2.20.1",
+    "nodemon": "^1.14.11",
+    "ts-node": "^4.1.0"
+  }
+}
