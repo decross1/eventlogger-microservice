@@ -1,13 +1,9 @@
-// require('babel-core/register');  // May or may not need this?
 const Koa = require('koa');
 const app = new Koa();
 const AWS = require('aws-sdk');
 const path = require('path');
 const queueUrl = 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger';
 const faker = require('faker');
-
-console.log(__dirname);
-
 const port = process.env.PORT || 3000;
 AWS.config.loadFromPath(path.resolve(__dirname, '../config.json'));
 
@@ -39,10 +35,8 @@ let sendMessage = (messageBody, queueUrl) => {
   return new Promise((resolve, reject) => {
     sqs.sendMessage(params, (err, data) => {
       if (err) { 
-        console.log('Error sending message', err) 
         reject(err)
       } else { 
-        console.log('Message send success, ', data)
         resolve(data);
       };
     });
@@ -61,6 +55,26 @@ let sendMessage = (messageBody, queueUrl) => {
 // }
 
 // sendMessage(testMessage, queueUrl).then(data => console.log(data));
+
+// Logic to receive messages from the queue
+let receiveMessage = (queueUrl) => {
+  let params = {
+    QueueUrl: queueUrl, 
+    VisibilityTimeout: 60
+  }
+
+  return new Promise((resolve, reject) => {
+    sqs.receiveMessage(params, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+}
+
+receiveMessage(queueUrl).then(data => console.log(data));
 
 const server = app.listen(port, () => {
   console.log(`Server listening on ${port}`);
