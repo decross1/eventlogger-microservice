@@ -1,4 +1,5 @@
 var faker = require('faker');
+var randomWorld = require('random-world');
 var moment = require('moment');
 var cities = require('cities');
 const fs = require('fs');
@@ -231,10 +232,10 @@ let generateRandomUserRides = (cityCoordinates) => {
   return bulk;
 }
 
-var inserts = generateRandomUserRides(coordinates);
+// var inserts = generateRandomUserRides(coordinates);
 
-var fields = ['userId', 'pickupLocationLat', 'pickupLocationLong', 'dropOffLocationLat', 'dropOffLocationLong', 
-              'surgeMultiplier', 'price', 'priceTimestamp']
+// var fields = ['userId', 'pickupLocationLat', 'pickupLocationLong', 'dropOffLocationLat', 'dropOffLocationLong', 
+//               'surgeMultiplier', 'price', 'priceTimestamp']
 
 // To convert into CSV format
 // var csv = json2csv({data: inserts, fields: fields });
@@ -245,35 +246,55 @@ var fields = ['userId', 'pickupLocationLat', 'pickupLocationLong', 'dropOffLocat
 //   console.log('Successful CSV Write');
 // })
 
+let generateRandomCities = () => {
+  var cityArray = [];
+  
+  while (cityArray.length < 600) {
+    let curCity = randomWorld.city();
+    if (cityArray.indexOf(curCity) === -1) {
+      cityArray.push(curCity);
+    }
+  }
+
+  return cityArray;
+}
+
+let generateRandomAvgSurgebyCity = () => {
+  let cityArray = generateRandomCities();
+  let bulk = [];
+  cityArray.forEach((city) => {
+
+    for (var daysAgo = 250; daysAgo > 0; daysAgo--) {
+      let timeIntervals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+      timeIntervals.forEach((interval) => {
+        bulk.push({
+          city: city, 
+          day: moment(randomTimeBetween(interval, interval + 1, daysAgo)).format("MMM DD YY").toString(),
+          timeInterval: interval, 
+          surgeMultiplier: parseFloat(parseFloat((Math.random() * (3.0 - 1.0) + 1.0).toFixed(1)))
+        })
+      })
+    }
+  })
+
+  return bulk
+}
+
+let test = generateRandomAvgSurgebyCity(coordinates);
+var fields = ['city', 'day', 'timeInterval', 'surgeMultiplier'];
+
+// To convert into CSV format
+var csv = json2csv({data: test, fields: fields });
+
+// Write the converted CSV to file
+fs.writeFile('./fakeAvgSurge2.csv', csv, (err) => {
+  if (err) { console.log('Error', err )};
+  console.log('Successful CSV Write');
+})
+
+
+
 /* ======= Logic for future functionality potentially ====================================================================== */
-// let convertEventLogDataTypeOne = (eventObject) => {
-//   let insertionTestResults = [];
-
-//   for (var cityNames in eventObject) {
-//     let cityArray = eventObject[cityNames];
-
-//     for (var i = 0; i < cityArray.length; i++) {
-//       let event = cityArray[i];
-//       let insertionObj = {
-//         // city: cities.gps_lookup(event.pickupLocation[1], event.pickupLocation[0]), // This takes SUPER LONG
-//         city: cityNames, 
-//         date: moment(event.timeStamp).format("MMM Do YY"), 
-//         timeInterval: moment(event.timeStamp).format('HH'), 
-//         surgeMultiplier: event.surgeMultiplier
-//       }
-
-//       insertionTestResults.push(insertionObj);
-//     }
-
-//     console.log('Completed City, ', cityNames);
-    
-//   }
-
-//   return insertionTestResults;
-// }
-
-// var inserts = convertEventLogDataTypeOne(test);
-// var fields = ['city', 'date', 'timeInterval', 'surgeMultiplier'];
 
 // fs.writeFile('./fakeData4.json', JSON.stringify(test), (err) => {
 //   if (err) { console.log('Error', err )};
