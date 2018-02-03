@@ -3,6 +3,7 @@ var randomWorld = require('random-world');
 var moment = require('moment');
 const fs = require('fs');
 const json2csv = require('json2csv');
+const cities = require('./cities.js');
 
 // Step 1: calculate distance using getDistanceFromLatLonInKm
 // Step 2: calculate rideFare using calculateRidefare
@@ -201,7 +202,7 @@ let generateRandomUserRides = (cityCoordinates) => {
   let cityArray = Object.keys(cityCoordinates);
   let bulk = [];
     
-    for (var daysAgo = 105; daysAgo > 90; daysAgo--) {
+    for (var daysAgo = 15; daysAgo > 0; daysAgo--) {
       let timeIntervals = timeIntervalsVolume()
 
       for(var times in timeIntervals) {
@@ -243,30 +244,18 @@ let generateRandomUserRides = (cityCoordinates) => {
 // var csv = json2csv({data: inserts, fields: fields });
 
 // // Write the converted CSV to file
-// fs.writeFile('./fakeData.csv', csv, (err) => {
+// fs.writeFile('./fakeData6.csv', csv, (err) => {
 //   if (err) { console.log('Error', err )};
 //   console.log('Successful CSV Write');
 // })
 
-let generateRandomCities = () => {
-  var cityArray = [];
-  
-  while (cityArray.length < 600) {
-    let curCity = randomWorld.city();
-    if (cityArray.indexOf(curCity) === -1) {
-      cityArray.push(curCity);
-    }
-  }
-
-  return cityArray;
-}
 
 let generateRandomAvgSurgebyCity = () => {
-  let cityArray = generateRandomCities();
+  let cityArray = cities.cities;
   let bulk = [];
   cityArray.forEach((city) => {
 
-    for (var daysAgo = 250; daysAgo > 0; daysAgo--) {
+    for (var daysAgo = 500; daysAgo > 250; daysAgo--) {
       let timeIntervals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
       timeIntervals.forEach((interval) => {
         bulk.push({
@@ -282,27 +271,26 @@ let generateRandomAvgSurgebyCity = () => {
   return bulk;
 }
 
-let test = generateRandomAvgSurgebyCity();
-var fields = ['city', 'day', 'timeInterval', 'surgeMultiplier'];
+// let test = generateRandomAvgSurgebyCity();
+// var fields = ['city', 'day', 'timeInterval', 'surgeMultiplier'];
 
-// To convert into CSV format
-var csv = json2csv({data: test, fields: fields });
+// // To convert into CSV format
+// var csv = json2csv({data: test, fields: fields });
 
-// Write the converted CSV to file
-fs.writeFile('./fakeAvgSurge1.csv', csv, (err) => {
-    if (err) { console.log('Error', err )};
-    console.log('Successful CSV Write');
-  })
+// // Write the converted CSV to file
+// fs.writeFile('./fakeAvgSurge1.csv', csv, (err) => {
+//     if (err) { console.log('Error', err )};
+//     console.log('Successful CSV Write');
+//   })
   
 
 
 let generateRandomDriversByCity = () => {
-  debugger;
-  let cityArray = generateRandomCities();
+  let cityArray = cities.cities;
   let bulk = [];
   cityArray.forEach((city) => {
     let timeIntervals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
-    for(var daysAgo = 720; daysAgo > 550; daysAgo--){
+    for(var daysAgo = 250; daysAgo > 0; daysAgo--){
       timeIntervals.forEach((interval) => {
         bulk.push({
           city: city, 
@@ -316,6 +304,8 @@ let generateRandomDriversByCity = () => {
   return bulk;
 }
 
+// for (var i = 0; i < 1000; i++) { console.log(randomWorld.city({country: 'United States'}))};
+
 // let test = generateRandomDriversByCity();
 // var fields = ['city', 'day', 'timeInterval', 'avgDrivers'];
 
@@ -323,7 +313,7 @@ let generateRandomDriversByCity = () => {
 // var csv = json2csv({data: test, fields: fields });
 
 // // Write the converted CSV to file
-// fs.writeFile('./fakeAvgDrivers.csv', csv, (err) => {
+// fs.writeFile('./fakeAvgDrivers2.csv', csv, (err) => {
 //     if (err) { console.log('Error', err )};
 //     console.log('Successful CSV Write');
 //   })

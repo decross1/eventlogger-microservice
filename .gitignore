@@ -70,4 +70,10 @@ dataGen/PricingServiceData/fakeData2.csv
 dataGen/PricingServiceData/fakeData3.csv
 dataGen/PricingServiceData/fakeData4.csv
 dataGen/PricingServiceData/fakeData5.csv
+dataGen/PricingServiceData/fakeData6.csv
 dataGen/AvgDriversData/fakeAvgDrivers.csv
+dataGen/AvgDriversData/fakeAvgDrivers1.csv
+dataGen/AvgDriversData/fakeAvgDrivers2.csv
+
+
+.DS_Store

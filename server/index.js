@@ -5,7 +5,9 @@ const AWS = require('aws-sdk');
 const path = require('path');
 const queueUrl = 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger';
 const faker = require('faker');
-let cities = require('../dataGen/cities.js');
+const db = require('../database/index.js');
+const cities = require('../dataGen/cities.js');
+
 
 const port = process.env.PORT || 3000;
 AWS.config.loadFromPath(path.resolve(__dirname, '../config.json'));
@@ -80,7 +82,7 @@ let receiveMessage = (queueUrl) => {
   });
 };
 
-receiveMessage(queueUrl).then(data => console.log(data.Messages[0]));
+// receiveMessage(queueUrl).then(data => console.log(data.Messages[0]));
 
 let deleteMessage = (receiptId, queueUrl) => {
   let params = {
@@ -110,3 +112,5 @@ receiveMessage(queueUrl)
 const server = app.listen(port, () => {
   console.log(`Server listening on ${port}`);
 });
+
+db.getAvgSurge(cities.cities);

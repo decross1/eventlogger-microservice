@@ -49,6 +49,8 @@ CREATE TABLE avg_surge_by_city (
     )    
 WITH CLUSTERING ORDER BY (timeInterval DESC);
 
+-- copy eventlogger.avg_surge_by_city (city, day, timeinterval, surgeMultipler) from 'fakeAvgSurge.csv';
+
 
 CREATE TABLE avg_drivers_by_city (
     city VARCHAR, 
@@ -57,7 +59,7 @@ CREATE TABLE avg_drivers_by_city (
     avgDrivers FLOAT,
     PRIMARY KEY((day, timeInterval), city)
     )    
-WITH CLUSTERING ORDER BY (timeInterval DESC);
+WITH CLUSTERING ORDER BY (city DESC);
 
 
 CREATE MATERIALIZED VIEW avg_drivers_by_city_vw as 
