@@ -14,59 +14,59 @@ DROP TABLE IF EXISTS eventlogger.avg_drivers_by_city;
  
 CREATE TABLE pricing_service_logs (
     userId INT, 
-    pickUpLocationLat FLOAT, 
-    pickUpLocationLong FLOAT, 
-    dropOffLocationLat FLOAT, 
-    dropOffLocationLong FLOAT, 
+    city VARCHAR, 
+    -- pickUpLocationLat FLOAT, 
+    -- pickUpLocationLong FLOAT, 
+    -- dropOffLocationLat FLOAT, 
+    -- dropOffLocationLong FLOAT, 
     surgeMultiplier FLOAT, 
     price VARCHAR, 
-    priceTimeStamp TIMESTAMP, 
-    PRIMARY KEY(priceTimeStamp)
+    priceTimestamp TIMESTAMP,
+    timeInterval INT, 
+    day date,  
+    PRIMARY KEY((day, timeInterval), city, priceTimestamp, userId)
 );
 
-    -- (userId, pickUpLocationLat, pickUpLocationLong, dropOffLocationLat, dropOffLocationLong, surgeMultiplier, price, priceTimeStamp) 
+-- copy eventlogger.pricing_service_logs (userId, pickUpLocationLat, pickUpLocationLong, dropOffLocationLat, dropOffLocationLong, surgeMultiplier, price, timeInterval, day, priceTimestamp) from 'fakeData.csv';
+-- copy eventlogger.pricing_service_logs (userId, city, surgeMultiplier, price, timeInterval, day, priceTimestamp) from 'fakeData.csv';
+
 
 CREATE TABLE ridematching_service_logs (
     userId INT, 
-    priceTimeStamp TIMESTAMP,
+    city VARCHAR, 
+    day date, 
+    priceTimestamp TIMESTAMP,
     PRIMARY KEY(priceTimeStamp)
 );
 
+
 CREATE TABLE avg_surge_by_city (
     city VARCHAR, 
-    day VARCHAR,
-    timeInterval VARCHAR, 
+    day date,
+    timeInterval INT, 
     surgeMultiplier FLOAT, 
-    PRIMARY KEY((city,day), timeInterval)
-);
+    PRIMARY KEY(day, timeInterval, city)
+    )    
+WITH CLUSTERING ORDER BY (timeInterval DESC);
+
 
 CREATE TABLE avg_drivers_by_city (
     city VARCHAR, 
-    day VARCHAR,
-    timeInterval VARCHAR,  
+    day date,
+    timeInterval INT,  
     avgDrivers FLOAT,
-    PRIMARY KEY((city,day), timeInterval)
-);
+    PRIMARY KEY((day, timeInterval), city)
+    )    
+WITH CLUSTERING ORDER BY (timeInterval DESC);
 
--- CREATE TABLE temperature_by_day (
---     weatherstation_id text,
---     date text,
---     event_time timestamp,
---     temperature text,
---     PRIMARY KEY ((weatherstation_id,date),event_time)
--- );
 
--- CREATE KEYSPACE test WITH REPLICATION = {
---     'class': 'SimpleStrategy', 
---     'replication_factor': 1
--- };
+CREATE MATERIALIZED VIEW avg_drivers_by_city_vw as 
+    select city, day, timeinterval, avgDrivers
+    from avg_drivers_by_city
+    where city is not null 
+        and day is not null
+        and timeinterval is not null
+        and avgDrivers is not null
+    PRIMARY KEY((timeinterval), city, day)
 
--- INSERT INTO test.temperature_by_day(weatherstation_id,date,event_time,temperature) VALUES ('1234ABCD','2013-04-03','2013-04-03 07:01:00','72F');
-
--- INSERT INTO test.temperature_by_day(weatherstation_id,date,event_time,temperature) VALUES ('1234ABCD','2013-04-03','2013-04-03 07:02:00','73F');
-
--- INSERT INTO test.temperature_by_day(weatherstation_id,date,event_time,temperature) VALUES ('1234ABCD','2013-04-04','2013-04-04 07:01:00','73F');
-
--- INSERT INTO test.temperature_by_day(weatherstation_id,date,event_time,temperature) VALUES ('1234ABCD','2013-04-04','2013-04-04 07:02:00','74F');
-
--- SELECT * FROM temperature_by_day WHERE weatherstation_id='1234ABCD' AND date='2013-04-03';
+-- copy eventlogger.avg_drivers_by_city (city, day, timeinterval, avgDrivers) from 'fakeAvgDrivers.csv';

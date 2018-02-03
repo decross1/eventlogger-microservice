@@ -59,3 +59,15 @@ typings/
 
 # aws information   
 config.json
+
+# fake data
+dataGen/AvgSurgeData/fakeAvgSurge.csv
+dataGen/AvgSurgeData/fakeAvgSurge1.csv
+dataGen/AvgSurgeData/fakeAvgSurge2.csv
+dataGen/PricingServiceData/fakeData.csv
+dataGen/PricingServiceData/fakeData1.csv
+dataGen/PricingServiceData/fakeData2.csv
+dataGen/PricingServiceData/fakeData3.csv
+dataGen/PricingServiceData/fakeData4.csv
+dataGen/PricingServiceData/fakeData5.csv
+dataGen/AvgDriversData/fakeAvgDrivers.csv

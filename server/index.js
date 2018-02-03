@@ -1,11 +1,17 @@
 const Koa = require('koa');
+const bodyParser = require('koa-bodyparser')
 const app = new Koa();
 const AWS = require('aws-sdk');
 const path = require('path');
 const queueUrl = 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger';
 const faker = require('faker');
+let cities = require('../dataGen/cities.js');
+
 const port = process.env.PORT || 3000;
 AWS.config.loadFromPath(path.resolve(__dirname, '../config.json'));
+
+// Turn on Body Parsing
+app.use(bodyParser());
 
 // Logic for Creating a new queue;
 let sqs = new AWS.SQS({
@@ -48,10 +54,10 @@ let sendMessage = (messageBody, queueUrl) => {
 //   dropOffLocationLong: -122.49291176761801,
 //   pickupLocationLat: 37.75482926359066,
 //   pickupLocationLong: -122.46571235616491,
-//   price: "11.28",
+//   price: "112.21",
 //   priceTimestamp: "2017-10-18 08:38:05-07:00",
-//   surgeMultiplier: 2.9,
-//   userId: 62882
+//   surgeMultiplier: 1.2,
+//   userId: 218763
 // }
 
 // sendMessage(testMessage, queueUrl).then(data => console.log(data));
@@ -72,9 +78,34 @@ let receiveMessage = (queueUrl) => {
       }
     });
   });
-}
+};
 
-receiveMessage(queueUrl).then(data => console.log(data));
+receiveMessage(queueUrl).then(data => console.log(data.Messages[0]));
+
+let deleteMessage = (receiptId, queueUrl) => {
+  let params = {
+    QueueUrl: queueUrl, 
+    ReceiptHandle: receiptId
+  }
+  
+  return new Promise((resolve, reject) => {
+    sqs.deleteMessage(params, (err, data) => {
+      if(err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+};
+
+receiveMessage(queueUrl)
+  .then((data) => {
+    var messageBody = JSON.parse(data.Messages[0].Body);
+    var receiptId = data.Messages[0].ReceiptHandle;
+    deleteMessage(receiptId, queueUrl);
+  });
+
 
 const server = app.listen(port, () => {
   console.log(`Server listening on ${port}`);

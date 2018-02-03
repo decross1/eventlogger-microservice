@@ -217,14 +217,15 @@ let generateRandomUserRides = (cityCoordinates) => {
 
           bulk.push({
             userId: faker.random.number() + faker.random.number(), 
-            pickupLocationLat: curLocation[0],
-            pickupLocationLong: curLocation[1],
-            dropOffLocationLat: destLocation[0], 
-            dropOffLocationLong: destLocation[1], 
+            city: curCity, 
+            // pickupLocationLat: curLocation[0],
+            // pickupLocationLong: curLocation[1],
+            // dropOffLocationLat: destLocation[0], 
+            // dropOffLocationLong: destLocation[1], 
             surgeMultiplier: parseFloat((Math.random() * (3.0 - 1.0) + 1.0).toFixed(1)), 
             price: priceCalc, 
             timeInterval: time,
-            day: moment(randomTimeBetween(time, time + 1, daysAgo)).format("MMM DD YY").toString(),
+            day: moment(randomTimeBetween(time, time + 1, daysAgo)).format("YYYY-MM-DD"),
             priceTimestamp: randomTimeBetween(time, time + 1, daysAgo)
           })
         }
@@ -233,98 +234,97 @@ let generateRandomUserRides = (cityCoordinates) => {
   return bulk;
 }
 
-var inserts = generateRandomUserRides(coordinates);
+// var inserts = generateRandomUserRides(coordinates);
 
-var fields = ['userId', 'pickupLocationLat', 'pickupLocationLong', 'dropOffLocationLat', 'dropOffLocationLong', 
-              'surgeMultiplier', 'price', 'timeInterval', 'day', 'priceTimestamp']
+// var fields = ['userId', 'city', /*'pickupLocationLat', 'pickupLocationLong', 'dropOffLocationLat', 'dropOffLocationLong', */
+//               'surgeMultiplier', 'price', 'timeInterval', 'day', 'priceTimestamp']
+
+// // To convert into CSV format
+// var csv = json2csv({data: inserts, fields: fields });
+
+// // Write the converted CSV to file
+// fs.writeFile('./fakeData.csv', csv, (err) => {
+//   if (err) { console.log('Error', err )};
+//   console.log('Successful CSV Write');
+// })
+
+let generateRandomCities = () => {
+  var cityArray = [];
+  
+  while (cityArray.length < 600) {
+    let curCity = randomWorld.city();
+    if (cityArray.indexOf(curCity) === -1) {
+      cityArray.push(curCity);
+    }
+  }
+
+  return cityArray;
+}
+
+let generateRandomAvgSurgebyCity = () => {
+  let cityArray = generateRandomCities();
+  let bulk = [];
+  cityArray.forEach((city) => {
+
+    for (var daysAgo = 250; daysAgo > 0; daysAgo--) {
+      let timeIntervals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+      timeIntervals.forEach((interval) => {
+        bulk.push({
+          city: city, 
+          day: moment(randomTimeBetween(interval, interval + 1, daysAgo)).format("YYYY-MM-DD"),
+          timeInterval: interval, 
+          surgeMultiplier: parseFloat(parseFloat((Math.random() * (3.0 - 1.0) + 1.0).toFixed(1)))
+        })
+      })
+    }
+  })
+
+  return bulk;
+}
+
+let test = generateRandomAvgSurgebyCity();
+var fields = ['city', 'day', 'timeInterval', 'surgeMultiplier'];
 
 // To convert into CSV format
-var csv = json2csv({data: inserts, fields: fields });
+var csv = json2csv({data: test, fields: fields });
 
 // Write the converted CSV to file
-fs.writeFile('./fakeData.csv', csv, (err) => {
-  if (err) { console.log('Error', err )};
-  console.log('Successful CSV Write');
-})
-
-// let generateRandomCities = () => {
-//   var cityArray = [];
+fs.writeFile('./fakeAvgSurge1.csv', csv, (err) => {
+    if (err) { console.log('Error', err )};
+    console.log('Successful CSV Write');
+  })
   
-//   while (cityArray.length < 600) {
-//     let curCity = randomWorld.city();
-//     if (cityArray.indexOf(curCity) === -1) {
-//       cityArray.push(curCity);
-//     }
-//   }
 
-//   return cityArray;
-// }
 
-// let generateRandomAvgSurgebyCity = () => {
-//   let cityArray = generateRandomCities();
-//   let bulk = [];
-//   cityArray.forEach((city) => {
+let generateRandomDriversByCity = () => {
+  debugger;
+  let cityArray = generateRandomCities();
+  let bulk = [];
+  cityArray.forEach((city) => {
+    let timeIntervals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    for(var daysAgo = 720; daysAgo > 550; daysAgo--){
+      timeIntervals.forEach((interval) => {
+        bulk.push({
+          city: city, 
+          day: moment(randomTimeBetween(interval, interval + 1, daysAgo)).format("YYYY-MM-DD"),
+          timeInterval: interval, 
+          avgDrivers:  Math.ceil(Math.random() * (4500 - 500) + 500)
+        })
+      })
+    }
+  })
+  return bulk;
+}
 
-//     for (var daysAgo = 250; daysAgo > 0; daysAgo--) {
-//       let timeIntervals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
-//       timeIntervals.forEach((interval) => {
-//         bulk.push({
-//           city: city, 
-//           day: moment(randomTimeBetween(interval, interval + 1, daysAgo)).format("MMM DD YY").toString(),
-//           timeInterval: interval, 
-//           surgeMultiplier: parseFloat(parseFloat((Math.random() * (3.0 - 1.0) + 1.0).toFixed(1)))
-//         })
-//       })
-//     }
-//   })
-
-//   return bulk
-// }
-
-// let test = generateRandomAvgSurgebyCity(coordinates);
-// var fields = ['city', 'day', 'timeInterval', 'surgeMultiplier'];
+// let test = generateRandomDriversByCity();
+// var fields = ['city', 'day', 'timeInterval', 'avgDrivers'];
 
 // // To convert into CSV format
 // var csv = json2csv({data: test, fields: fields });
 
 // // Write the converted CSV to file
-// fs.writeFile('./fakeAvgSurge2.csv', csv, (err) => {
-//   if (err) { console.log('Error', err )};
-//   console.log('Successful CSV Write');
-// })
-
-
-
-/* ======= Logic for future functionality potentially ====================================================================== */
-
-// fs.writeFile('./fakeData4.json', JSON.stringify(test), (err) => {
-//   if (err) { console.log('Error', err )};
-//   console.log('Successful JSON Write');
-// })
-
-
-// let generateDriverIds = () => {
-//   var driverIds = {};
-//   var driverArray = [] 
-
-//   for (var i = 0; i < 100000; i++) {
-//     var driverId = faker.random.number() + faker.random.number();
-
-//     if(!driverIds[driverId]) {
-//       driverIds[driverId] = driverId;
-//     }
-//   }
-
-//   for(var drivers in driverIds) {
-//     driverArray.push(driverIds[drivers]);
-//   }
-
-//   return driverArray;
-// }
-
-// console.log('Created %d unique drivers', Object.keys(driverIds).length);
-
-
-// console.log(moment(faker.date.between(moment(), moment().add(1, 'hour'))).format('MMMM Do YYYY, h:mm:ss a'));
-// console.log(generateRandomDrivers(coordinates));
+// fs.writeFile('./fakeAvgDrivers.csv', csv, (err) => {
+//     if (err) { console.log('Error', err )};
+//     console.log('Successful CSV Write');
+//   })
 
