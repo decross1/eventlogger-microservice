@@ -62,13 +62,13 @@ CREATE TABLE avg_drivers_by_city (
 WITH CLUSTERING ORDER BY (city DESC);
 
 
-CREATE MATERIALIZED VIEW avg_drivers_by_city_vw as 
-    select city, day, timeinterval, avgDrivers
-    from avg_drivers_by_city
-    where city is not null 
-        and day is not null
-        and timeinterval is not null
-        and avgDrivers is not null
-    PRIMARY KEY((timeinterval), city, day)
+-- CREATE MATERIALIZED VIEW avg_drivers_by_city_vw as 
+--     select city, day, timeinterval, avgDrivers
+--     from avg_drivers_by_city
+--     where city is not null 
+--         and day is not null
+--         and timeinterval is not null
+--         and avgDrivers is not null
+--     PRIMARY KEY((timeinterval), day, city)
 
 -- copy eventlogger.avg_drivers_by_city (city, day, timeinterval, avgDrivers) from 'fakeAvgDrivers.csv';

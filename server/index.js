@@ -101,16 +101,22 @@ let deleteMessage = (receiptId, queueUrl) => {
   });
 };
 
-receiveMessage(queueUrl)
-  .then((data) => {
-    var messageBody = JSON.parse(data.Messages[0].Body);
-    var receiptId = data.Messages[0].ReceiptHandle;
-    deleteMessage(receiptId, queueUrl);
-  });
+// receiveMessage(queueUrl)
+//   .then((data) => {
+//     var messageBody = JSON.parse(data.Messages[0].Body);
+//     var receiptId = data.Messages[0].ReceiptHandle;
+//     deleteMessage(receiptId, queueUrl);
+//   });
 
 
 const server = app.listen(port, () => {
   console.log(`Server listening on ${port}`);
 });
 
-db.getAvgSurge(cities.cities);
+// to map a single object to send to pricing. 
+// db.getAvgSurge(cities.cities).then(results => { 
+//   var test = results.map((obj) => obj.rows[0]);
+//   console.log(test);
+// });
+
+db.insertAvgSurge();

@@ -1,6 +1,7 @@
 const cassandra = require('cassandra-driver');
 const fs = require('fs');
 const moment = require('moment');
+const cities = require('../dataGen/cities.js');
 
 const client = new cassandra.Client({
     contactPoints: ['127.0.0.1'], 
@@ -14,42 +15,56 @@ client.connect((err) => {
     console.log('Connection to Cassandra successful');
 });
 
-// let eventLogTypeOneQuery = `INSERT INTO eventlogger.pricing_service_logs (userId, pickUpLocationLat, pickUpLocationLong, dropOffLocationLat, dropOffLocationLong, surgeMultiplier, price, priceTimeStamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-
-// let params = [ fakeData.sanFrancisco[0].userId, fakeData.sanFrancisco[0].pickupLocation[0], 
-//             fakeData.sanFrancisco[0].pickupLocation[1], fakeData.sanFrancisco[0].dropOffLocation[0],                        
-//             fakeData.sanFrancisco[0].dropOffLocation[1], fakeData.sanFrancisco[0].surgeMultiplier, 
-//             fakeData.sanFrancisco[0].price, fakeData.sanFrancisco[0].timeStamp];
-
-
-// client.execute(eventLogTypeOneQuery, params, { prepare: true }, (err) => {
-//     if(err) { console.log('Error', err); }
-//     console.log('Insert Successful');
-// });
-
-let getAvgSurge = (cityArray) => {
-    let data = {};
-    let query = 'SELECT * FROM avg_surge_by_city where day = ? and city = ? and timeinterval = ?'
-
-    cityArray.forEach((city) => {
+let getAvgSurge = (cityArray) => { 
+    return Promise.all(cityArray.map(city => {
+        let query = 'SELECT * FROM avg_surge_by_city where day = ? and city = ? and timeinterval = ?'
         // let day = moment().format("YYYY-MM-DD");
         let day = '2016-11-23';
         let timeInterval = moment().format('HH');
         let params = [day, city, timeInterval];
-        client.execute(query, params, { prepare: true }, (err, result) => {
-            if (err) { console.log('Error ', err ) }
-            else { 
-                console.log(params);
-                console.log('Query Success, ', result.rows[0]) 
-            }
+        return client.execute(query, params, { prepare: true })
+    }));
+}
+
+let getAvgDrivers = (cityArray) => {
+    return Promise.all(cityArray.map(city => {
+        let query = 'SELECT * FROM avg_drivers_by_city where day = ? and city = ? and timeinterval = ?';
+        // let day = moment().format("YYYY-MM-DD");
+        let day = '2018-02-02';
+        let timeInterval = moment().format('HH');
+        let params = [day, city, timeInterval];
+        return client.execute(query, params, { prepare: true })
+    }));
+}
+
+let aggregateAvgSurge = () => {
+    let query = 'select city, avg(surgeMultiplier) as surgeMultipler from pricing_service_logs where day = ? and timeinterval = ? group by city';
+    let day = '2018-02-02';
+    let timeInterval = moment().format('HH');
+    let params = [day, timeInterval];
+    return client.execute(query, params, { prepare: true });
+}
+
+let insertAvgSurge = () => {
+    aggregateAvgSurge()
+        .then(data => {
+            data.rows.forEach((cityObject) => {
+                let query = 'INSERT INTO avg_surge_by_city (city, day, timeinterval, surgeMultiplier) values (?, ?, ?, ?)';
+                let city = cityObject.city;
+                let surgeMultipler = cityObject.surgemultipler;
+                let day = moment().format("YYYY-MM-DD");
+                let timeInterval = moment().format('HH');
+                let params = [city, day, timeInterval, surgeMultipler];
+
+                client.execute(query, params, { prepare: true });
+            })
         })
-    })
 }
 
 
-// select city, avg(avgDrivers) from avg_drivers_by_city_vw where timeinterval = 1 
-// and city = 'Bath' and day > '2016-07-27' and day < '2016-08-01' group by city
-
 module.exports = {
-    getAvgSurge: getAvgSurge
+    getAvgSurge, 
+    getAvgDrivers, 
+    aggregateAvgSurge, 
+    insertAvgSurge
 }
