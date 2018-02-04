@@ -4,9 +4,9 @@ const app = new Koa();
 const AWS = require('aws-sdk');
 const path = require('path');
 const queueUrl = 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger';
-const faker = require('faker');
 const db = require('../database/index.js');
 const cities = require('../dataGen/cities.js');
+const data = require('../dataGen/datagen.js');
 
 
 const port = process.env.PORT || 3000;
@@ -51,19 +51,6 @@ let sendMessage = (messageBody, queueUrl) => {
   })
 };
 
-// let testMessage = {
-//   dropOffLocationLat: 37.74086463144683,
-//   dropOffLocationLong: -122.49291176761801,
-//   pickupLocationLat: 37.75482926359066,
-//   pickupLocationLong: -122.46571235616491,
-//   price: "112.21",
-//   priceTimestamp: "2017-10-18 08:38:05-07:00",
-//   surgeMultiplier: 1.2,
-//   userId: 218763
-// }
-
-// sendMessage(testMessage, queueUrl).then(data => console.log(data));
-
 // Logic to receive messages from the queue
 let receiveMessage = (queueUrl) => {
   let params = {
@@ -82,8 +69,6 @@ let receiveMessage = (queueUrl) => {
   });
 };
 
-// receiveMessage(queueUrl).then(data => console.log(data.Messages[0]));
-
 let deleteMessage = (receiptId, queueUrl) => {
   let params = {
     QueueUrl: queueUrl, 
@@ -101,14 +86,6 @@ let deleteMessage = (receiptId, queueUrl) => {
   });
 };
 
-// receiveMessage(queueUrl)
-//   .then((data) => {
-//     var messageBody = JSON.parse(data.Messages[0].Body);
-//     var receiptId = data.Messages[0].ReceiptHandle;
-//     deleteMessage(receiptId, queueUrl);
-//   });
-
-
 const server = app.listen(port, () => {
   console.log(`Server listening on ${port}`);
 });
@@ -119,4 +96,7 @@ const server = app.listen(port, () => {
 //   console.log(test);
 // });
 
-db.insertAvgSurge();
+// db.insertAvgSurge();
+
+// var test = data.generateRandomPricingLog();
+// db.insertPricingLogs(test.userId, test.city, test.surgeMultiplier, test.price, test.priceTimestamp);

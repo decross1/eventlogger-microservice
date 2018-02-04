@@ -235,6 +235,16 @@ let generateRandomUserRides = (cityCoordinates) => {
   return bulk;
 }
 
+let generateRandomPricingLog = () => {
+  return {
+    userId: faker.random.number() + faker.random.number(), 
+    city: cities.cities[Math.ceil(Math.random() * cities.cities.length - 1)], 
+    surgeMultiplier: parseFloat((Math.random() * (3.0 - 1.0) + 1.0).toFixed(1)), 
+    price: (Math.random() * (35.00 - 3.00) + 3.00).toFixed(2), 
+    priceTimestamp: moment().format('YYYY-MM-DD hh:mm:ssZ')
+  }
+}
+
 // var inserts = generateRandomUserRides(coordinates);
 
 // var fields = ['userId', 'city', /*'pickupLocationLat', 'pickupLocationLong', 'dropOffLocationLat', 'dropOffLocationLong', */
@@ -290,7 +300,7 @@ let generateRandomDriversByCity = () => {
   let bulk = [];
   cityArray.forEach((city) => {
     let timeIntervals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
-    for(var daysAgo = 250; daysAgo > 0; daysAgo--){
+    for(var daysAgo = 250; daysAgo > 0; daysAgo--) {
       timeIntervals.forEach((interval) => {
         bulk.push({
           city: city, 
@@ -318,3 +328,6 @@ let generateRandomDriversByCity = () => {
 //     console.log('Successful CSV Write');
 //   })
 
+module.exports = {
+  generateRandomPricingLog
+}
