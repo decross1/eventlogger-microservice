@@ -7,7 +7,7 @@ config:
     headers:
       x-my-service-auth: '987401838271002188298567'
   payload: 
-    path: "1000logs.csv"
+    path: "100000logs.csv"
     fields: 
       - "userId"
       - "city"
@@ -16,7 +16,7 @@ config:
       - "priceTimestamp"
 scenarios:
   - flow:
-    - loop:
+    - loop: 
       - post:
           url: "/pricinglogs"
           json:
@@ -25,4 +25,4 @@ scenarios:
             surgeMultiplier: "{{ surgeMultiplier }}"
             price: "{{ price }}"
             priceTimestamp: "{{ priceTimestamp }}"
-      count : 2
+      count: 200
