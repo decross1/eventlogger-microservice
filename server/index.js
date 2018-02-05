@@ -1,7 +1,7 @@
 const Koa = require('koa');
-const router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
 const app = new Koa();
+const router = require('./router.js');
 const AWS = require('aws-sdk');
 const path = require('path');
 const queueUrl = 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger';
@@ -16,6 +16,8 @@ AWS.config.loadFromPath(path.resolve(__dirname, '../config.json'));
 // Turn on Body Parsing
 app.use(bodyParser());
 
+// Allow routes 
+app.use(router.routes()).use(router.allowedMethods());
 
 const server = app.listen(port, () => {
   console.log(`Server listening on ${port}`);
@@ -30,6 +32,7 @@ const server = app.listen(port, () => {
 // db.insertAvgSurge();
 
 // var test = data.generateRandomPricingLog();
+// console.log(test);
 // db.insertPricingLogs(test.userId, test.city, test.surgeMultiplier, test.price, test.priceTimestamp);
 
 
