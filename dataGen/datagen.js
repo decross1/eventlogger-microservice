@@ -235,18 +235,6 @@ let generateRandomUserRides = (cityCoordinates) => {
   return bulk;
 }
 
-let generateRandomPricingLog = () => {
-  return {
-    userId: faker.random.number() + faker.random.number(), 
-    city: cities.cities[Math.ceil(Math.random() * cities.cities.length - 1)], 
-    surgeMultiplier: parseFloat((Math.random() * (3.0 - 1.0) + 1.0).toFixed(1)), 
-    price: (Math.random() * (35.00 - 3.00) + 3.00).toFixed(2), 
-    priceTimestamp: moment().format('YYYY-MM-DD hh:mm:ssZ')
-  }
-}
-
-// var inserts = generateRandomUserRides(coordinates);
-
 // var fields = ['userId', 'city', /*'pickupLocationLat', 'pickupLocationLong', 'dropOffLocationLat', 'dropOffLocationLong', */
 //               'surgeMultiplier', 'price', 'timeInterval', 'day', 'priceTimestamp']
 
@@ -259,6 +247,63 @@ let generateRandomPricingLog = () => {
 //   console.log('Successful CSV Write');
 // })
 
+let generateRandomPricingLog = () => {
+  return {
+    userId: faker.random.number() + faker.random.number(), 
+    city: cities.cities[Math.ceil(Math.random() * cities.cities.length - 1)], 
+    surgeMultiplier: parseFloat((Math.random() * (3.0 - 1.0) + 1.0).toFixed(1)), 
+    price: (Math.random() * (35.00 - 3.00) + 3.00).toFixed(2), 
+    priceTimestamp: moment().format('YYYY-MM-DD hh:mm:ssZ')
+  }
+}
+
+let generateNumLogs = (num) => {
+  let tests = [];
+
+  for (var i = 0; i < num; i++) {
+    let insert = generateRandomPricingLog();
+    tests.push(insert);
+  }
+
+  return tests;
+}
+
+// var inserts = generateNumLogs(1000);
+// var fields = ['userId', 'city', 'surgeMultiplier', 'price', 'priceTimestamp'];
+
+// // To convert into CSV format
+// var csv = json2csv({data: inserts, fields: fields });
+
+// // Write the converted CSV to file
+// fs.writeFile('./1000logs.csv', csv, (err) => {
+//   if (err) { console.log('Error', err )};
+//   console.log('Successful CSV Write');
+// })
+
+
+// var inserts = generateNumLogs(100000);
+// var fields = ['userId', 'city', 'surgeMultiplier', 'price', 'priceTimestamp'];
+
+// // To convert into CSV format
+// var csv = json2csv({data: inserts, fields: fields });
+
+// // Write the converted CSV to file
+// fs.writeFile('./100000logs.csv', csv, (err) => {
+//   if (err) { console.log('Error', err )};
+//   console.log('Successful CSV Write');
+// })
+
+// var inserts = generateNumLogs(1000000);
+// var fields = ['userId', 'city', 'surgeMultiplier', 'price', 'priceTimestamp'];
+
+// // To convert into CSV format
+// var csv = json2csv({data: inserts, fields: fields });
+
+// // Write the converted CSV to file
+// fs.writeFile('./1000000logs.csv', csv, (err) => {
+//   if (err) { console.log('Error', err )};
+//   console.log('Successful CSV Write');
+// })
 
 let generateRandomAvgSurgebyCity = () => {
   let cityArray = cities.cities;

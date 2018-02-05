@@ -1,0 +1,26 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+  defaults:
+    headers:
+      x-my-service-auth: '987401838271002188298567'
+  payload: 
+    path: "1000logs.csv"
+    fields: 
+      - "userId"
+      - "city"
+      - "surgeMultiplier"
+      - "price"
+      - "priceTimestamp"
+scenarios:
+  - flow:
+    - post:
+        url: "/pricinglogs"
+        json:
+          userId: "{{ userId }}"
+          city: "{{ city }}"
+          surgeMultiplier: "{{ surgeMultiplier }}"
+          price: "{{ price }}"
+          priceTimestamp: "{{ priceTimestamp }}"

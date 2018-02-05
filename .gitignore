@@ -75,5 +75,10 @@ dataGen/AvgDriversData/fakeAvgDrivers.csv
 dataGen/AvgDriversData/fakeAvgDrivers1.csv
 dataGen/AvgDriversData/fakeAvgDrivers2.csv
 
+# load testing CSVs
+load_testing/1000logs.csv
+load_testing/100000logs.csv
+load_testing/1000000logs.csv
+
 
 .DS_Store

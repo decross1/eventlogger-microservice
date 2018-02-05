@@ -56,7 +56,7 @@ let insertAvgSurge = () => {
                 let timeInterval = moment().format('HH');
                 let params = [city, day, timeInterval, surgeMultipler];
 
-                client.execute(query, params, { prepare: true });
+                return client.execute(query, params, { prepare: true });
             })
         })
 }
@@ -67,7 +67,7 @@ let insertAvgDrivers = (city, avgDrivers) => {
     let timeInterval = moment().format('HH');
     let params = [city, day, timeInterval, avgDrivers];
 
-    client.execute(query, params, { prepare: true });
+    return client.execute(query, params, { prepare: true });
 }
 
 let insertPricingLogs = (userId, city, surgeMultiplier, price, priceTimestamp) => {
@@ -76,7 +76,7 @@ let insertPricingLogs = (userId, city, surgeMultiplier, price, priceTimestamp) =
     let timeInterval = moment().format('HH');
     let params = [userId, city, surgeMultiplier, price, priceTimestamp, timeInterval, day];
     
-    client.execute(query, params, { prepare: true });
+    return client.execute(query, params, { prepare: true })
 }
 
 
