@@ -80,5 +80,7 @@ load_testing/1000logs.csv
 load_testing/100000logs.csv
 load_testing/1000000logs.csv
 
+# newrelic
+newrelic.js
 
 .DS_Store

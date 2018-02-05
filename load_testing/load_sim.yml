@@ -16,11 +16,13 @@ config:
       - "priceTimestamp"
 scenarios:
   - flow:
-    - post:
-        url: "/pricinglogs"
-        json:
-          userId: "{{ userId }}"
-          city: "{{ city }}"
-          surgeMultiplier: "{{ surgeMultiplier }}"
-          price: "{{ price }}"
-          priceTimestamp: "{{ priceTimestamp }}"
+    - loop:
+      - post:
+          url: "/pricinglogs"
+          json:
+            userId: "{{ userId }}"
+            city: "{{ city }}"
+            surgeMultiplier: "{{ surgeMultiplier }}"
+            price: "{{ price }}"
+            priceTimestamp: "{{ priceTimestamp }}"
+      count : 2
