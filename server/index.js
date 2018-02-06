@@ -5,7 +5,6 @@ const app = new Koa();
 const router = require('./router.js');
 const AWS = require('aws-sdk');
 const path = require('path');
-const queueUrl = 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger';
 const db = require('../database/index.js');
 const cities = require('../dataGen/cities.js');
 const data = require('../dataGen/datagen.js');
@@ -24,6 +23,44 @@ const server = app.listen(port, () => {
   console.log(`Server listening on ${port}`);
 });
 
+// Logic for Creating a new queue;
+let sqs = new AWS.SQS({
+  apiVersion: '2012-11-05'
+});
+
+const queue = {
+  ridematching: 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger', 
+  pricinginbox: 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger', 
+  pricingoutbox: 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger'
+}
+
+let calculateConversionRatio = async () => {
+  let results = {};
+  let cityUsers =  await db.getUserCount();
+  let matchedUsers = await db.getMatchedCount();
+  
+  cityUsers.rows.forEach(city => {
+    results[city.city] = {
+      totalusers: city.totalusers.low
+    }
+  })
+
+  matchedUsers.rows.forEach(city => {
+    Object.assign(results[city.city], {
+      matchedrides: city.matchrides.low,
+      conversionRatio: city.matchrides.low / results[city.city].totalusers
+    })
+  })
+
+  console.log(results);
+}
+
+calculateConversionRatio();
+
+// let receivePricingData = () => {
+//   let message = await receiveMessage(queue.pricinginbox);
+  
+// }
 // to map a single object to send to pricing. 
 // db.getAvgSurge(cities.cities).then(results => { 
 //   var test = results.map((obj) => obj.rows[0]);
@@ -38,10 +75,6 @@ const server = app.listen(port, () => {
 
 
 
-// Logic for Creating a new queue;
-let sqs = new AWS.SQS({
-  apiVersion: '2012-11-05'
-});
 
 // let params = {
 //     QueueName: 'eventlogger', 

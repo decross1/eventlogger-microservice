@@ -74,6 +74,9 @@ dataGen/PricingServiceData/fakeData6.csv
 dataGen/AvgDriversData/fakeAvgDrivers.csv
 dataGen/AvgDriversData/fakeAvgDrivers1.csv
 dataGen/AvgDriversData/fakeAvgDrivers2.csv
+dataGen/RideMatching/ridematchinglogs.csv
+dataGen/RideMatching/ridematchinglogs1.csv
+
 
 # load testing CSVs
 load_testing/1000logs.csv

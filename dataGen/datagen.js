@@ -373,6 +373,45 @@ let generateRandomDriversByCity = () => {
 //     console.log('Successful CSV Write');
 //   })
 
+
+let generateRandomRidesMatched = (cityCoordinates) => {
+  let cityArray = Object.keys(cityCoordinates);
+  let bulk = [];
+    
+    for (var daysAgo = 15; daysAgo > 0; daysAgo--) {
+      let timeIntervals = timeIntervalsVolume()
+
+      for(var times in timeIntervals) {
+        let time = parseInt(times);
+        let rideVolume = timeIntervals[times] * Math.random();
+
+        for (var i = 0; i <= rideVolume; i++) {
+          let curCity = cityArray[Math.floor(Math.random() * cityArray.length)];
+ 
+          bulk.push({
+            userId: faker.random.number() + faker.random.number(), 
+            city: curCity, 
+            timeInterval: time,
+            day: moment(randomTimeBetween(time, time + 1, daysAgo)).format("YYYY-MM-DD"),
+            priceTimestamp: randomTimeBetween(time, time + 1, daysAgo)
+          })
+        }
+      }
+    }
+  return bulk;
+}
+// var inserts = generateRandomRidesMatched(coordinates);
+// var fields = ['userId', 'city', 'timeInterval', 'day', 'priceTimestamp']
+
+// // To convert into CSV format
+// var csv = json2csv({data: inserts, fields: fields });
+
+// // Write the converted CSV to file
+// fs.writeFile('./ridematchinglogs.csv', csv, (err) => {
+//   if (err) { console.log('Error', err )};
+//   console.log('Successful CSV Write');
+// })
+
 module.exports = {
   generateRandomPricingLog
 }

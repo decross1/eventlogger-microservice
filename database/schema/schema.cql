@@ -36,9 +36,18 @@ CREATE TABLE ridematching_service_logs (
     city VARCHAR, 
     day date, 
     priceTimestamp TIMESTAMP,
-    PRIMARY KEY(priceTimeStamp)
+    timeinterval int, 
+    PRIMARY KEY((day, timeinterval), city, priceTimestamp, userId)
 );
 
+CREATE TABLE conversion_ratio (
+    city varchar, 
+    day date, 
+    timeinterval INT, 
+    insertTime timestamp, 
+    conversion_ratio FLOAT, 
+    PRIMARY KEY ((day, timeinterval), city, insertTime)
+);
 
 CREATE TABLE avg_surge_by_city (
     city VARCHAR, 
