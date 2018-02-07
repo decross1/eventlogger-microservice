@@ -41,7 +41,9 @@ let calculateConversionRatio = async () => {
   
   cityUsers.rows.forEach(city => {
     results[city.city] = {
-      totalusers: city.totalusers.low
+      totalusers: city.totalusers.low,
+      day: city.day.date, 
+      timeinterval: city.timeinterval
     }
   })
 
@@ -52,10 +54,14 @@ let calculateConversionRatio = async () => {
     })
   })
 
-  console.log(results);
+  for(city in results) {
+    let day = results[city].day;
+    let timeinterval = results[city].timeinterval;
+    let conversionRatio = results[city].conversionRatio;
+    db.insertConversionRatio(day, city, timeinterval, conversionRatio);
+  }
 }
 
-calculateConversionRatio();
 
 // let receivePricingData = () => {
 //   let message = await receiveMessage(queue.pricinginbox);

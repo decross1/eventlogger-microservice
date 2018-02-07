@@ -89,7 +89,7 @@ let insertDriverLogs = (userId, city, priceTimestamp) => {
 }
 
 let getUserCount = () => {
-    let query = 'SELECT city, count(*) as totalUsers from pricing_service_logs where day = ? and timeinterval = ? group by city';
+    let query = 'SELECT city, day, timeinterval, count(*) as totalUsers from pricing_service_logs where day = ? and timeinterval = ? group by city';
     let day = '2018-02-02';
     let timeInterval = 12;
     // let day = moment().format("YYYY-MM-DD");
@@ -100,7 +100,7 @@ let getUserCount = () => {
 }
 
 let getMatchedCount = () => {
-    let query = 'SELECT city, count(*) as matchRides from ridematching_service_logs where day = ? and timeinterval = ? group by city';
+    let query = 'SELECT city, day, timeinterval, count(*) as matchRides from ridematching_service_logs where day = ? and timeinterval = ? group by city';
     let day = '2018-02-02';
     let timeInterval = 12;
     // let day = moment().format("YYYY-MM-DD");
@@ -118,21 +118,14 @@ let getConversionRatio = () => {
     return client.execute(query, params, { prepare: true });
 }
 
-// let insertConversionRatio = () => {
-//     let cityUsers, cityMatched;
-//     getUserCount().then(results => cityUsers = results.rows[0]);
-//     getMatchedCount().then(results => cityMatched = results.rows[0]);
-//     console.log(cityUsers);
-// //      .then(data => {
-// //          data.rows.forEach(obj => {
-// //             let query = 'INSERT INTO conversion_ratio (day, city, timeInterval, insertTime,  conversion_ratio) values (?, ?, ?, ?, ?)';
-// //             let day = moment().format("YYYY-MM-DD");
-// //             let timeInterval = moment().format("HH");
-// //             let insertTime = moment().format('YYYY-MM-DD hh:mm:ssZ');
-// //             let params = [day, ]
-// //         })
-// //     })
-// }
+let insertConversionRatio = (day, city, timeinterval, conversion_ratio) => {
+    let query = 'INSERT INTO conversion_ratio (day, city, timeInterval, insertTime, conversion_ratio) values (?, ?, ?, ?, ?)';
+    let dayMod = moment(day).format("YYYY-MM-DD");
+    let insertTime = moment().format('YYYY-MM-DD hh:mm:ssZ');
+    let params = [dayMod, city, timeinterval, insertTime, conversion_ratio];
+
+    return client.execute(query, params, { prepare: true });
+}
 
 module.exports = {
     getAvgSurge, 
@@ -144,5 +137,5 @@ module.exports = {
     getConversionRatio, 
     getUserCount, 
     getMatchedCount,
-    // insertConversionRatio, 
+    insertConversionRatio, 
 }
