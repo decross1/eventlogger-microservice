@@ -176,7 +176,7 @@ let randomCoordinates = (city) => {
 
 
 let randomTimeBetween = (start, end, daysAgo) => {
-    return moment(faker.date.between(moment().startOf('day').subtract(daysAgo, 'days').add(start, 'hour').format('YYYY-MM-DD hh:mm:ssZ'), moment().startOf('day').subtract(daysAgo, 'days').add(end, 'hour'))).format('YYYY-MM-DD hh:mm:ssZ');
+    return moment(faker.date.between(moment().startOf('day').subtract(daysAgo, 'days').add(start, 'hour').format('YYYY-MM-DD HH:mm:ssZ'), moment().startOf('day').subtract(daysAgo, 'days').add(end, 'hour'))).format('YYYY-MM-DD HH:mm:ssZ');
   }
 
 let timeIntervalsVolume = () => {
@@ -253,7 +253,7 @@ let generateRandomPricingLog = () => {
     city: cities.cities[Math.ceil(Math.random() * cities.cities.length - 1)], 
     surgeMultiplier: parseFloat((Math.random() * (3.0 - 1.0) + 1.0).toFixed(1)), 
     price: (Math.random() * (35.00 - 3.00) + 3.00).toFixed(2), 
-    priceTimestamp: moment().format('YYYY-MM-DD hh:mm:ssZ')
+    priceTimestamp: moment().format('YYYY-MM-DD HH:mm:ssZ')
   }
 }
 

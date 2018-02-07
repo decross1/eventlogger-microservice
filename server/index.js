@@ -9,6 +9,7 @@ const db = require('../database/index.js');
 const cities = require('../dataGen/cities.js');
 const data = require('../dataGen/datagen.js');
 const cron = require('node-cron');
+const Consumer = require('sqs-consumer');
 
 
 const port = process.env.PORT || 3000;
@@ -25,15 +26,80 @@ const server = app.listen(port, () => {
 });
 
 // Logic for Creating a new queue;
-let sqs = new AWS.SQS({
-  apiVersion: '2012-11-05'
-});
+let sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
 const queue = {
-  ridematching: 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger', 
+  ridematching: 'https://sqs.us-west-1.amazonaws.com/278687533626/ridematching', 
   pricinginbox: 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger', 
   pricingoutbox: 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger'
 }
+
+// Logic for starting the consumer
+const pricingInbox = Consumer.create({
+  queueUrl: queue.pricinginbox, 
+  batchSize: 10, 
+  handleMessage: (message, done) => {
+    if(JSON.parse(message.Body)) {
+      let log = JSON.parse(message.Body);
+      db.insertPricingLogs(log.userId, log.city, log.surgeMultiplier, log.price, log.priceTimestamp)
+        .then(results => console.log('Pricing log insert completed'));
+    }
+    done();
+  }, 
+  sqs: sqs
+});
+
+pricingInbox.on('error', (err) => {
+  console.log('Pricing Queue Error: ', err);
+});
+
+pricingInbox.on('empty', () => {
+  console.log('Pricing Queue Emptied')
+})
+
+pricingInbox.start();
+
+const rideMatchingInbox = Consumer.create({
+  queueUrl: queue.ridematching, 
+  batchSize: 10, 
+  handleMessage: (message, done) => {
+    if(JSON.parse(message.Body)) {
+      let log = JSON.parse(message.Body);
+      db.insertDriverLogs(log.userId, log.city, log.priceTimestamp)
+       .then(results => console.log('Ridematching insert completed'));
+    }
+    done();
+  }, 
+  sqs: sqs
+});
+
+rideMatchingInbox.on('error', (err) => {
+  console.log('RideMatching Queue Error: ', err);
+});
+
+rideMatchingInbox.on('empty', () => {
+  console.log('RideMatching Queue Emptied')
+})
+
+rideMatchingInbox.start();
+
+
+let sendMessage = (messageBody, queueUrl) => {
+  let params = {
+    MessageBody: JSON.stringify(messageBody), 
+    QueueUrl: queueUrl, 
+    DelaySeconds: 0
+  }
+  return new Promise((resolve, reject) => {
+    sqs.sendMessage(params, (err, data) => {
+      if (err) { 
+        reject(err)
+      } else { 
+        resolve(data);
+      };
+    });
+  })
+};
 
 let calculateConversionRatio = async () => {
   let results = {};
@@ -63,16 +129,12 @@ let calculateConversionRatio = async () => {
   }
 }
 
-cron.schedule('*/2 * * * *', () => {
-  console.log('Running calculate conversion ratio')
-  calculateConversionRatio();
-});
+// cron.schedule('*/2 * * * *', () => {
+//   console.log('Running calculate conversion ratio')
+//   calculateConversionRatio();
+// });
 
 
-// let receivePricingData = () => {
-//   let message = await receiveMessage(queue.pricinginbox);
-  
-// }
 // to map a single object to send to pricing. 
 // db.getAvgSurge(cities.cities).then(results => { 
 //   var test = results.map((obj) => obj.rows[0]);
@@ -81,75 +143,3 @@ cron.schedule('*/2 * * * *', () => {
 
 // db.insertAvgSurge();
 
-// var test = data.generateRandomPricingLog();
-// console.log(test);
-// db.insertPricingLogs(test.userId, test.city, test.surgeMultiplier, test.price, test.priceTimestamp);
-
-
-
-
-// let params = {
-//     QueueName: 'eventlogger', 
-//     Attributes: {
-//         'DelaySeconds': 0, 
-//         'MessageRetentionPeriod': 345600
-//     }
-// }
-
-// sqs.createQueue(params, (err, data) => {
-//     if(err) { console.log('Error Creating Queue, ', err) }
-//     console.log('Queue creation successful') 
-// });
-
-// Logic for Sending a message
-let sendMessage = (messageBody, queueUrl) => {
-  let params = {
-    MessageBody: JSON.stringify(messageBody), 
-    QueueUrl: queueUrl, 
-    DelaySeconds: 0
-  }
-  return new Promise((resolve, reject) => {
-    sqs.sendMessage(params, (err, data) => {
-      if (err) { 
-        reject(err)
-      } else { 
-        resolve(data);
-      };
-    });
-  })
-};
-
-// Logic to receive messages from the queue
-let receiveMessage = (queueUrl) => {
-  let params = {
-    QueueUrl: queueUrl, 
-    VisibilityTimeout: 60
-  }
-
-  return new Promise((resolve, reject) => {
-    sqs.receiveMessage(params, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-};
-
-let deleteMessage = (receiptId, queueUrl) => {
-  let params = {
-    QueueUrl: queueUrl, 
-    ReceiptHandle: receiptId
-  }
-
-  return new Promise((resolve, reject) => {
-    sqs.deleteMessage(params, (err, data) => {
-      if(err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-};

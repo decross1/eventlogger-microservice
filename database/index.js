@@ -72,7 +72,7 @@ let insertAvgDrivers = (city, avgDrivers) => {
 
 let insertPricingLogs = (userId, city, surgeMultiplier, price, priceTimestamp) => {
     let query = 'INSERT INTO pricing_service_logs (userId, city, surgeMultiplier, price, priceTimestamp, timeInterval, day) values (?, ?, ?, ?, ?, ?, ?)';
-    let day = moment().format("YYYY-MM-DD");
+    let day = moment(priceTimestamp).format("YYYY-MM-DD");
     let timeInterval = moment(priceTimestamp).format('HH');
     let params = [userId, city, surgeMultiplier, price, priceTimestamp, timeInterval, day];
     
@@ -81,7 +81,7 @@ let insertPricingLogs = (userId, city, surgeMultiplier, price, priceTimestamp) =
 
 let insertDriverLogs = (userId, city, priceTimestamp) => {
     let query = 'INSERT INTO ridematching_service_logs (userId, city, priceTimestamp, timeInterval, day) values (?, ?, ?, ?, ?)';
-    let day = moment().format("YYYY-MM-DD");
+    let day = moment(priceTimestamp).format("YYYY-MM-DD");
     let timeInterval = moment(priceTimestamp).format('HH');
     let params = [userId, city, priceTimestamp, timeInterval, day];
     
@@ -121,7 +121,7 @@ let getConversionRatio = () => {
 let insertConversionRatio = (day, city, timeinterval, conversion_ratio) => {
     let query = 'INSERT INTO conversion_ratio (day, city, timeInterval, insertTime, conversion_ratio) values (?, ?, ?, ?, ?)';
     let dayMod = moment(day).format("YYYY-MM-DD");
-    let insertTime = moment().format('YYYY-MM-DD hh:mm:ssZ');
+    let insertTime = moment().format('YYYY-MM-DD HH:mm:ssZ');
     let params = [dayMod, city, timeinterval, insertTime, conversion_ratio];
 
     return client.execute(query, params, { prepare: true });
