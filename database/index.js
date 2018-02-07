@@ -91,7 +91,7 @@ let insertDriverLogs = (userId, city, priceTimestamp) => {
 let getUserCount = () => {
     let query = 'SELECT city, day, timeinterval, count(*) as totalUsers from pricing_service_logs where day = ? and timeinterval = ? group by city';
     let day = '2018-02-02';
-    let timeInterval = 12;
+    let timeInterval = 13;
     // let day = moment().format("YYYY-MM-DD");
     // let timeInterval = moment().format("HH");
     let params = [day, timeInterval];
@@ -102,7 +102,7 @@ let getUserCount = () => {
 let getMatchedCount = () => {
     let query = 'SELECT city, day, timeinterval, count(*) as matchRides from ridematching_service_logs where day = ? and timeinterval = ? group by city';
     let day = '2018-02-02';
-    let timeInterval = 12;
+    let timeInterval = 13;
     // let day = moment().format("YYYY-MM-DD");
     // let timeInterval = moment().format("HH");
     let params = [day, timeInterval];

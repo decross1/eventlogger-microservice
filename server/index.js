@@ -8,6 +8,7 @@ const path = require('path');
 const db = require('../database/index.js');
 const cities = require('../dataGen/cities.js');
 const data = require('../dataGen/datagen.js');
+const cron = require('node-cron');
 
 
 const port = process.env.PORT || 3000;
@@ -61,6 +62,11 @@ let calculateConversionRatio = async () => {
     db.insertConversionRatio(day, city, timeinterval, conversionRatio);
   }
 }
+
+cron.schedule('*/2 * * * *', () => {
+  console.log('Running calculate conversion ratio')
+  calculateConversionRatio();
+});
 
 
 // let receivePricingData = () => {
