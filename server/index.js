@@ -66,7 +66,10 @@ const rideMatchingInbox = Consumer.create({
     if(JSON.parse(message.Body)) {
       let log = JSON.parse(message.Body);
       db.insertDriverLogs(log.userId, log.city, log.priceTimestamp)
-       .then(results => console.log('Ridematching insert completed'));
+       .then(results => {
+        console.log('Ridematching insert completed')
+        // calculateConversionRatio();
+        });
     }
     done();
   }, 
@@ -102,6 +105,8 @@ let sendMessage = (messageBody, queueUrl) => {
 };
 
 let calculateConversionRatio = async () => {
+  console.log('Ratio Calculation Started');
+  debugger;
   let results = {};
   let cityUsers =  await db.getUserCount();
   let matchedUsers = await db.getMatchedCount();
@@ -109,7 +114,7 @@ let calculateConversionRatio = async () => {
   cityUsers.rows.forEach(city => {
     results[city.city] = {
       totalusers: city.totalusers.low,
-      day: city.day.date, 
+      day: city.day, 
       timeinterval: city.timeinterval
     }
   })
@@ -124,15 +129,15 @@ let calculateConversionRatio = async () => {
   for(city in results) {
     let day = results[city].day;
     let timeinterval = results[city].timeinterval;
-    let conversionRatio = results[city].conversionRatio;
-    db.insertConversionRatio(day, city, timeinterval, conversionRatio);
+    let conversionRatio = results[city].conversionRatio || 0;
+    db.insertConversionRatio(day, city, timeinterval, conversionRatio)
+     .then(results => console.log('Ratio Calculation Done'));
   }
 }
-
-// cron.schedule('*/2 * * * *', () => {
-//   console.log('Running calculate conversion ratio')
-//   calculateConversionRatio();
-// });
+cron.schedule('*/1 * * * *', () => {
+  console.log('Running calculate conversion ratio')
+  calculateConversionRatio();
+});
 
 
 // to map a single object to send to pricing. 

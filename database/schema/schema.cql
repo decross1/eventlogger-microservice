@@ -11,6 +11,8 @@ DROP TABLE IF EXISTS eventlogger.pricing_service_logs;
 DROP TABLE IF EXISTS eventlogger.ridematching_service_logs;
 DROP TABLE IF EXISTS eventlogger.avg_surge_by_city;
 DROP TABLE IF EXISTS eventlogger.avg_drivers_by_city;
+DROP TABLE IF EXISTS eventlogger.conversion_ratio;
+
  
 CREATE TABLE pricing_service_logs (
     userId INT, 
@@ -23,7 +25,7 @@ CREATE TABLE pricing_service_logs (
     price VARCHAR, 
     priceTimestamp TIMESTAMP,
     timeInterval INT, 
-    day date,  
+    day varchar,  
     PRIMARY KEY((day, timeInterval), city, priceTimestamp, userId)
 );
 
@@ -34,7 +36,7 @@ CREATE TABLE pricing_service_logs (
 CREATE TABLE ridematching_service_logs (
     userId INT, 
     city VARCHAR, 
-    day date, 
+    day varchar, 
     priceTimestamp TIMESTAMP,
     timeinterval int, 
     PRIMARY KEY((day, timeinterval), city, priceTimestamp, userId)
@@ -42,7 +44,7 @@ CREATE TABLE ridematching_service_logs (
 
 CREATE TABLE conversion_ratio (
     city varchar, 
-    day date, 
+    day varchar, 
     timeinterval INT, 
     insertTime timestamp, 
     conversion_ratio FLOAT, 
@@ -51,7 +53,7 @@ CREATE TABLE conversion_ratio (
 
 CREATE TABLE avg_surge_by_city (
     city VARCHAR, 
-    day date,
+    day varchar,
     timeInterval INT, 
     surgeMultiplier FLOAT, 
     PRIMARY KEY(day, timeInterval, city)
@@ -63,7 +65,7 @@ WITH CLUSTERING ORDER BY (timeInterval DESC);
 
 CREATE TABLE avg_drivers_by_city (
     city VARCHAR, 
-    day date,
+    day varchar,
     timeInterval INT,  
     avgDrivers FLOAT,
     PRIMARY KEY((day, timeInterval), city)

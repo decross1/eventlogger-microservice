@@ -257,6 +257,7 @@ let generateRandomPricingLog = () => {
   }
 }
 
+
 let generateNumLogs = (num) => {
   let tests = [];
 
