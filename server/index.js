@@ -31,7 +31,8 @@ let sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 const queue = {
   ridematching: 'https://sqs.us-west-1.amazonaws.com/278687533626/ridematching', 
   pricinginbox: 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger', 
-  pricingoutbox: 'https://sqs.us-west-1.amazonaws.com/278687533626/eventlogger'
+  driverinbox: 'https://sqs.us-west-1.amazonaws.com/278687533626/drivers', 
+  pricingoutbox: 'https://sqs.us-west-1.amazonaws.com/278687533626/pricingoutbox'
 }
 
 // Logic for starting the consumer
@@ -86,6 +87,29 @@ rideMatchingInbox.on('empty', () => {
 
 rideMatchingInbox.start();
 
+const driverInbox = Consumer.create({
+  queueUrl: queue.driverinbox, 
+  batchSize: 10, 
+  handleMessage: (message, done) => {
+    if(JSON.parse(message.Body)) {
+      let log = JSON.parse(message.Body);
+      db.insertAvgDrivers(log);
+    }
+    done();
+  }, 
+  sqs: sqs
+});
+
+driverInbox.on('error', (err) => {
+  console.log('Pricing Queue Error: ', err);
+});
+
+driverInbox.on('empty', () => {
+  console.log('Pricing Queue Emptied')
+})
+
+driverInbox.start();
+
 
 let sendMessage = (messageBody, queueUrl) => {
   let params = {
@@ -106,7 +130,6 @@ let sendMessage = (messageBody, queueUrl) => {
 
 let calculateConversionRatio = async () => {
   console.log('Ratio Calculation Started');
-  debugger;
   let results = {};
   let cityUsers =  await db.getUserCount();
   let matchedUsers = await db.getMatchedCount();
@@ -134,10 +157,10 @@ let calculateConversionRatio = async () => {
      .then(results => console.log('Ratio Calculation Done'));
   }
 }
-cron.schedule('*/1 * * * *', () => {
-  console.log('Running calculate conversion ratio')
-  calculateConversionRatio();
-});
+// cron.schedule('*/1 * * * *', () => {
+//   console.log('Running calculate conversion ratio')
+//   calculateConversionRatio();
+// });
 
 
 // to map a single object to send to pricing. 

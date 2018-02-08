@@ -18,8 +18,7 @@ client.connect((err) => {
 let getAvgSurge = (cityArray) => { 
     return Promise.all(cityArray.map(city => {
         let query = 'SELECT * FROM avg_surge_by_city where day = ? and city = ? and timeinterval = ?'
-        // let day = moment().format("YYYY-MM-DD");
-        let day = '2018-02-02';
+        let day = moment().format("YYYY-MM-DD");
         let timeInterval = moment().format('HH');
         let params = [day, city, timeInterval];
         return client.execute(query, params, { prepare: true })
@@ -29,8 +28,7 @@ let getAvgSurge = (cityArray) => {
 let getAvgDrivers = (cityArray) => {
     return Promise.all(cityArray.map(city => {
         let query = 'SELECT * FROM avg_drivers_by_city where day = ? and city = ? and timeinterval = ?';
-        // let day = moment().format("YYYY-MM-DD");
-        let day = '2018-02-02';
+        let day = moment().format("YYYY-MM-DD");
         let timeInterval = moment().format('HH');
         let params = [day, city, timeInterval];
         return client.execute(query, params, { prepare: true })
@@ -39,7 +37,7 @@ let getAvgDrivers = (cityArray) => {
 
 let aggregateAvgSurge = () => {
     let query = 'select city, avg(surgeMultiplier) as surgeMultipler from pricing_service_logs where day = ? and timeinterval = ? group by city';
-    let day = '2018-02-02';
+    let day = moment().format("YYYY-MM-DD");
     let timeInterval = moment().format('HH');
     let params = [day, timeInterval];
     return client.execute(query, params, { prepare: true });
@@ -61,13 +59,17 @@ let insertAvgSurge = () => {
         })
 }
 
-let insertAvgDrivers = (city, avgDrivers) => {
-    let query = 'INSERT INTO avg_drivers_by_city (city, day, timeinterval, avgDrivers) values (?, ?, ?, ?)';
-    let day = moment().format("YYYY-MM-DD");
-    let timeInterval = moment().format('HH');
-    let params = [city, day, timeInterval, avgDrivers];
-
-    return client.execute(query, params, { prepare: true });
+let insertAvgDrivers = (driverArray) => {
+    driverArray.forEach(cityObj => {
+        let query = 'INSERT INTO avg_drivers_by_city (city, day, timeinterval, avgDrivers) values (?, ?, ?, ?)';
+        let city = cityObj.city;
+        let avgDrivers = cityObj.drivers;
+        let day = moment().format("YYYY-MM-DD");
+        let timeInterval = moment().format('HH');
+        let params = [city, day, timeInterval, avgDrivers];
+    
+        return client.execute(query, params, { prepare: true });
+    })
 }
 
 let insertPricingLogs = (userId, city, surgeMultiplier, price, priceTimestamp) => {
@@ -138,4 +140,5 @@ module.exports = {
     getUserCount, 
     getMatchedCount,
     insertConversionRatio, 
+    insertAvgDrivers
 }

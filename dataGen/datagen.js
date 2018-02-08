@@ -360,6 +360,20 @@ let generateRandomDriversByCity = () => {
   return bulk;
 }
 
+let generateRandomDriverLog = () => {
+  let cityArray = cities.cities;
+  let result = [];
+
+  cityArray.forEach(city => {
+    result.push({
+      city: city, 
+      drivers: Math.ceil(Math.random() * (4500 - 500) + 500)
+    })
+  })
+
+  return result;
+}
+
 // for (var i = 0; i < 1000; i++) { console.log(randomWorld.city({country: 'United States'}))};
 
 // let test = generateRandomDriversByCity();
@@ -414,5 +428,6 @@ let generateRandomRidesMatched = (cityCoordinates) => {
 // })
 
 module.exports = {
-  generateRandomPricingLog
+  generateRandomPricingLog, 
+  generateRandomDriverLog
 }
