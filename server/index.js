@@ -15,11 +15,6 @@ const Consumer = require('sqs-consumer');
 const port = process.env.PORT || 3000;
 AWS.config.loadFromPath(path.resolve(__dirname, '../config.json'));
 
-// Turn on Body Parsing
-app.use(bodyParser());
-
-// Allow routes 
-app.use(router.routes()).use(router.allowedMethods());
 
 const server = app.listen(port, () => {
   console.log(`Server listening on ${port}`);
@@ -101,11 +96,11 @@ const driverInbox = Consumer.create({
 });
 
 driverInbox.on('error', (err) => {
-  console.log('Pricing Queue Error: ', err);
+  console.log('Driver Queue Error: ', err);
 });
 
 driverInbox.on('empty', () => {
-  console.log('Pricing Queue Emptied')
+  console.log('Driver Queue Emptied')
 })
 
 driverInbox.start();
@@ -157,17 +152,44 @@ let calculateConversionRatio = async () => {
      .then(results => console.log('Ratio Calculation Done'));
   }
 }
-// cron.schedule('*/1 * * * *', () => {
-//   console.log('Running calculate conversion ratio')
-//   calculateConversionRatio();
-// });
+cron.schedule('*/1 * * * *', () => {
+  console.log('Running calculate conversion ratio')
+  calculateConversionRatio();
+});
+
+let packagePricingServiceData = async () => { 
+  let packageData = {}
+  let surgeInsert = await db.insertAvgSurge();
+  let averageSurge = await db.getAvgSurge(cities.cities);
+  let mappedSurge = averageSurge.map(obj => obj.rows[0]);
+  let averageDrivers = await db.getAvgDrivers(cities.cities);
+  let mappedDrivers = averageDrivers.map(obj => obj.rows[0]);
+  mappedSurge.forEach(row => {
+    packageData[row.city] = {
+      day: row.day,  
+      timeInterval: row.timeinterval, 
+      surgeMultiplier: row.surgemultiplier
+    } 
+  });
+
+  mappedDrivers.forEach(row => {
+    Object.assign(packageData[row.city], {
+      avgdrivers: row.avgdrivers
+    })
+  })
+
+  sendMessage(packageData, queue.pricingoutbox).then(console.log('Package Data Sent off'));
+}
+
+cron.schedule('* */1 * * *', () => {
+  console.log('Packaging Pricing Data')
+  packagePricingServiceData();
+})
 
 
-// to map a single object to send to pricing. 
-// db.getAvgSurge(cities.cities).then(results => { 
-//   var test = results.map((obj) => obj.rows[0]);
-//   console.log(test);
-// });
+// Old Logic Needed for Api End Points
+// // Turn on Body Parsing
+// app.use(bodyParser());
 
-// db.insertAvgSurge();
-
+// // Allow routes 
+// app.use(router.routes()).use(router.allowedMethods());

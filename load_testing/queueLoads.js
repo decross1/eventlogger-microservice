@@ -55,25 +55,25 @@ let simulateLoad = () => {
 }
 
 // Uncomment for Pricing and Ride Matching Load Sim
-// setInterval(() => {
-//   console.log('User Journey Started');
-//   simulateLoad();
-// }, 100);
+setInterval(() => {
+  console.log('User Journey Started');
+  simulateLoad();
+}, 1000);
 
 let averageDriversSim = () => {
   let log = datagen.generateRandomDriverLog();
   sendMessage(log, queue.driverinbox);
 }
 
-// setInterval(() => {
-//   console.log('Sending a message to Drivers Inbox');
-//   averageDriversSim()
-// })
-
-cron.schedule('* */1 * * *', () => {
+setInterval(() => {
   console.log('Sending a message to Drivers Inbox');
-  averageDriversSim();
-})
+  averageDriversSim()
+}, 60000)
+
+// cron.schedule('* */1 * * *', () => {
+//   console.log('Sending a message to Drivers Inbox');
+//   averageDriversSim();
+// })
 
 // Simple Testing Query for Loading Messagebox
 //   let populateInbox = () => {
