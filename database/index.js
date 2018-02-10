@@ -140,5 +140,6 @@ module.exports = {
     getUserCount, 
     getMatchedCount,
     insertConversionRatio, 
-    insertAvgDrivers
+    insertAvgDrivers, 
+    client
 }

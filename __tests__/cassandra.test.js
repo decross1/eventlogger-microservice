@@ -15,6 +15,10 @@ afterAll(() => {});
 let db = require('../database/index.js');
 let cities = require('../dataGen/cities.js');
 
+afterEach(() => {
+    db.client.shutdown();
+});
+
 test('Successful Query for Average Surge should return an array', () => {
     expect.assertions(1)
 

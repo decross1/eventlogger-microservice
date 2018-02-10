@@ -188,7 +188,8 @@ module.exports = {
   packagePricingServiceData, 
   calculateConversionRatio, 
   sqs,
-  queue
+  queue, 
+  server
 }
 // Old Logic Needed for Api End Points
 // // Turn on Body Parsing

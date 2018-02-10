@@ -16,6 +16,10 @@ let cities = require('../dataGen/cities.js');
 let server = require('../server/index.js');
 let moment = require('moment');
 
+afterEach(() => {
+  server.server.close();
+})
+
 test('this will be some test');
 // test('SQS should contain all of the appropriate queues', () => {
 //     expect.assertions(1);
