@@ -58,7 +58,7 @@ let simulateLoad = () => {
 setInterval(() => {
   console.log('User Journey Started');
   simulateLoad();
-}, 1000);
+}, 100);
 
 let averageDriversSim = () => {
   let log = datagen.generateRandomDriverLog();
@@ -68,12 +68,12 @@ let averageDriversSim = () => {
 setInterval(() => {
   console.log('Sending a message to Drivers Inbox');
   averageDriversSim()
-}, 60000)
+}, 5000)
 
-// cron.schedule('* */1 * * *', () => {
-//   console.log('Sending a message to Drivers Inbox');
-//   averageDriversSim();
-// })
+cron.schedule('* */1 * * *', () => {
+  console.log('Sending a message to Drivers Inbox');
+  averageDriversSim();
+})
 
 // Simple Testing Query for Loading Messagebox
 //   let populateInbox = () => {

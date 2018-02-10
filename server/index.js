@@ -10,17 +10,18 @@ const cities = require('../dataGen/cities.js');
 const data = require('../dataGen/datagen.js');
 const cron = require('node-cron');
 const Consumer = require('sqs-consumer');
-
+const StatsD = require('node-statsd');
 
 const port = process.env.PORT || 3000;
 AWS.config.loadFromPath(path.resolve(__dirname, '../config.json'));
-
 
 const server = app.listen(port, () => {
   console.log(`Server listening on ${port}`);
 });
 
-// Logic for Creating a new queue;
+// Launch StatsD
+let client = new StatsD();
+
 let sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
 const queue = {
@@ -45,16 +46,6 @@ const pricingInbox = Consumer.create({
   sqs: sqs
 });
 
-pricingInbox.on('error', (err) => {
-  console.log('Pricing Queue Error: ', err);
-});
-
-pricingInbox.on('empty', () => {
-  console.log('Pricing Queue Emptied')
-})
-
-pricingInbox.start();
-
 const rideMatchingInbox = Consumer.create({
   queueUrl: queue.ridematching, 
   batchSize: 10, 
@@ -62,25 +53,14 @@ const rideMatchingInbox = Consumer.create({
     if(JSON.parse(message.Body)) {
       let log = JSON.parse(message.Body);
       db.insertDriverLogs(log.userId, log.city, log.priceTimestamp)
-       .then(results => {
+      .then(results => {
         console.log('Ridematching insert completed')
-        // calculateConversionRatio();
-        });
+      });
     }
     done();
   }, 
   sqs: sqs
 });
-
-rideMatchingInbox.on('error', (err) => {
-  console.log('RideMatching Queue Error: ', err);
-});
-
-rideMatchingInbox.on('empty', () => {
-  console.log('RideMatching Queue Emptied')
-})
-
-rideMatchingInbox.start();
 
 const driverInbox = Consumer.create({
   queueUrl: queue.driverinbox, 
@@ -95,6 +75,14 @@ const driverInbox = Consumer.create({
   sqs: sqs
 });
 
+pricingInbox.on('error', (err) => {
+  console.log('Pricing Queue Error: ', err);
+});
+
+rideMatchingInbox.on('error', (err) => {
+  console.log('RideMatching Queue Error: ', err);
+});
+
 driverInbox.on('error', (err) => {
   console.log('Driver Queue Error: ', err);
 });
@@ -103,8 +91,17 @@ driverInbox.on('empty', () => {
   console.log('Driver Queue Emptied')
 })
 
-driverInbox.start();
+rideMatchingInbox.on('empty', () => {
+  console.log('RideMatching Queue Emptied')
+})
 
+pricingInbox.on('empty', () => {
+  console.log('Pricing Queue Emptied')
+})
+
+rideMatchingInbox.start();
+driverInbox.start();
+pricingInbox.start();
 
 let sendMessage = (messageBody, queueUrl) => {
   let params = {
@@ -152,10 +149,11 @@ let calculateConversionRatio = async () => {
      .then(results => console.log('Ratio Calculation Done'));
   }
 }
-cron.schedule('*/1 * * * *', () => {
-  console.log('Running calculate conversion ratio')
-  calculateConversionRatio();
-});
+
+// cron.schedule('*/1 * * * *', () => {
+//   console.log('Running calculate conversion ratio')
+//   calculateConversionRatio();
+// });
 
 let packagePricingServiceData = async () => { 
   let packageData = {}
@@ -181,12 +179,17 @@ let packagePricingServiceData = async () => {
   sendMessage(packageData, queue.pricingoutbox).then(console.log('Package Data Sent off'));
 }
 
-cron.schedule('* */1 * * *', () => {
-  console.log('Packaging Pricing Data')
-  packagePricingServiceData();
-})
+// cron.schedule('*/1 * * * *', () => {
+//   console.log('Packaging Pricing Data')
+//   packagePricingServiceData();
+// })
 
-
+module.exports = {
+  packagePricingServiceData, 
+  calculateConversionRatio, 
+  sqs,
+  queue
+}
 // Old Logic Needed for Api End Points
 // // Turn on Body Parsing
 // app.use(bodyParser());

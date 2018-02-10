@@ -2,6 +2,9 @@ const cassandra = require('cassandra-driver');
 const fs = require('fs');
 const moment = require('moment');
 const cities = require('../dataGen/cities.js');
+const StatsD = require('node-statsd');
+
+let StatsClient = new StatsD();
 
 const client = new cassandra.Client({
     contactPoints: ['127.0.0.1'], 
@@ -59,11 +62,12 @@ let insertAvgSurge = () => {
         })
 }
 
+
 let insertAvgDrivers = (driverArray) => {
     driverArray.forEach(cityObj => {
         let query = 'INSERT INTO avg_drivers_by_city (city, day, timeinterval, avgDrivers) values (?, ?, ?, ?)';
         let city = cityObj.city;
-        let avgDrivers = cityObj.drivers;
+        let avgDrivers = cityObj.drivers || cityObj.count;
         let day = moment().format("YYYY-MM-DD");
         let timeInterval = moment().format('HH');
         let params = [city, day, timeInterval, avgDrivers];

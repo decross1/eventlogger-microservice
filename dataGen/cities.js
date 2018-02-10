@@ -632,5 +632,6 @@ module.exports = {
     'oklahomaCity',
     'louisville',
     'baltimore',  
+    'hawaii'
    ] 
 }
