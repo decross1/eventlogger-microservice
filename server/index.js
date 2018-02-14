@@ -150,10 +150,10 @@ let calculateConversionRatio = async () => {
   }
 }
 
-// cron.schedule('*/1 * * * *', () => {
-//   console.log('Running calculate conversion ratio')
-//   calculateConversionRatio();
-// });
+cron.schedule('*/1 * * * *', () => {
+  console.log('Running calculate conversion ratio')
+  calculateConversionRatio();
+});
 
 let packagePricingServiceData = async () => { 
   let packageData = {}
@@ -179,10 +179,10 @@ let packagePricingServiceData = async () => {
   sendMessage(packageData, queue.pricingoutbox).then(console.log('Package Data Sent off'));
 }
 
-// cron.schedule('*/1 * * * *', () => {
-//   console.log('Packaging Pricing Data')
-//   packagePricingServiceData();
-// })
+cron.schedule('*/1 * * * *', () => {
+  console.log('Packaging Pricing Data')
+  packagePricingServiceData();
+})
 
 module.exports = {
   packagePricingServiceData, 

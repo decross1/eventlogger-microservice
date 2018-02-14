@@ -6,8 +6,10 @@ const StatsD = require('node-statsd');
 
 let StatsClient = new StatsD();
 
+console.log(process.env.CASSANDRA_LISTEN_ADDRESS);
+
 const client = new cassandra.Client({
-    contactPoints: ['127.0.0.1'], 
+    contactPoints: ['172.31.12.186'], 
     keyspace: 'eventlogger'
 });
 
