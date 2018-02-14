@@ -5,14 +5,37 @@ services:
     image: decross1/eventlogger-microservice:node
     deploy:
       replicas: 5
+      restart_policy:
+        condition: on-failure
       resources:
         limits:
           cpus: "0.1"
           memory: 50M
-      restart_policy:
-        condition: on-failure
     ports:
       - "3000:3000"
+    networks:
+      - webnet
+  database:
+    image: decross1/eventlogger-microservice:cassandrav1
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 1000M
+    ports: 
+      - "9040:9040"
+    networks: 
+      - webnet
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
     networks:
       - webnet
 networks:
