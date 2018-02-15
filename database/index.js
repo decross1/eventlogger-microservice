@@ -3,15 +3,21 @@ const fs = require('fs');
 const moment = require('moment');
 const cities = require('../dataGen/cities.js');
 const StatsD = require('node-statsd');
+const config = require('../config.json');
 
-let StatsClient = new StatsD();
-
-console.log(process.env.CASSANDRA_LISTEN_ADDRESS);
 
 const client = new cassandra.Client({
-    contactPoints: ['172.31.12.186'], 
+    // contactPoints: ['172.31.12.186'], 
+    contactPoints: ['127.0.0.1'],
     keyspace: 'eventlogger'
 });
+
+let statsd = new StatsD({
+    host: 'statsd.hostedgraphite.com', 
+    port: 8125, 
+    prefix: config.graphite
+  });
+
 
 client.connect((err) => {
     if(err) {

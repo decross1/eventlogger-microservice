@@ -58,7 +58,7 @@ let simulateLoad = () => {
 setInterval(() => {
   console.log('User Journey Started');
   simulateLoad();
-}, 100);
+}, 10);
 
 let averageDriversSim = () => {
   let log = datagen.generateRandomDriverLog();

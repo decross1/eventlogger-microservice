@@ -11,6 +11,7 @@ const data = require('../dataGen/datagen.js');
 const cron = require('node-cron');
 const Consumer = require('sqs-consumer');
 const StatsD = require('node-statsd');
+const config = require('../config.json');
 
 const port = process.env.PORT || 3000;
 AWS.config.loadFromPath(path.resolve(__dirname, '../config.json'));
@@ -20,7 +21,11 @@ const server = app.listen(port, () => {
 });
 
 // Launch StatsD
-let client = new StatsD();
+let statsd = new StatsD({
+  host: 'statsd.hostedgraphite.com', 
+  port: 8125, 
+  prefix: config.graphite
+});
 
 let sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
@@ -37,9 +42,13 @@ const pricingInbox = Consumer.create({
   batchSize: 10, 
   handleMessage: (message, done) => {
     if(JSON.parse(message.Body)) {
+      let start = Date.now();
       let log = JSON.parse(message.Body);
       db.insertPricingLogs(log.userId, log.city, log.surgeMultiplier, log.price, log.priceTimestamp)
-        .then(results => console.log('Pricing log insert completed'));
+        .then(results => { 
+          statsd.timing('.pricinginbox.timing.latency', Date.now() - start)
+          console.log('Pricing Log Insert Completed')
+      });
     }
     done();
   }, 
@@ -51,9 +60,11 @@ const rideMatchingInbox = Consumer.create({
   batchSize: 10, 
   handleMessage: (message, done) => {
     if(JSON.parse(message.Body)) {
+      let start = Date.now()
       let log = JSON.parse(message.Body);
       db.insertDriverLogs(log.userId, log.city, log.priceTimestamp)
       .then(results => {
+        statsd.timing('.ridematching.timing.latency', Date.now() - start)
         console.log('Ridematching insert completed')
       });
     }
@@ -67,9 +78,11 @@ const driverInbox = Consumer.create({
   batchSize: 10, 
   handleMessage: (message, done) => {
     if(JSON.parse(message.Body)) {
+      let start = Date.now();
       let log = JSON.parse(message.Body);
       db.insertAvgDrivers(log);
     }
+    statsd.timing('.driverinsert.timing.latency', Date.now() - start)
     done();
   }, 
   sqs: sqs
@@ -122,9 +135,14 @@ let sendMessage = (messageBody, queueUrl) => {
 
 let calculateConversionRatio = async () => {
   console.log('Ratio Calculation Started');
+  let conversionStart = Date.now();
   let results = {};
+  let userStart = Date.now();
   let cityUsers =  await db.getUserCount();
+  statsd.timing('.getusercount.timing.latency', Date.now() - userStart);
+  let matchedStart = Date.now();
   let matchedUsers = await db.getMatchedCount();
+  statsd.timing('.getmatcheduser.timing.latency', Date.now() - matchedStart);
   
   cityUsers.rows.forEach(city => {
     results[city.city] = {
@@ -146,7 +164,10 @@ let calculateConversionRatio = async () => {
     let timeinterval = results[city].timeinterval;
     let conversionRatio = results[city].conversionRatio || 0;
     db.insertConversionRatio(day, city, timeinterval, conversionRatio)
-     .then(results => console.log('Ratio Calculation Done'));
+     .then(results =>  {
+       console.log('Ratio Calculation Done')
+       statsd.timing('.conversionratio.timing.latency', Date.now() - conversionStart);
+      });
   }
 }
 
@@ -156,11 +177,19 @@ cron.schedule('*/1 * * * *', () => {
 });
 
 let packagePricingServiceData = async () => { 
+  debugger;
+  let packageStart = Date.now();
   let packageData = {}
+  let surgeInsertStart = Date.now();
   let surgeInsert = await db.insertAvgSurge();
+  statsd.timing('.surgeinsert.timing.latency', Date.now() - surgeInsertStart);
+  let averageSurgeStart = Date.now();
   let averageSurge = await db.getAvgSurge(cities.cities);
+  statsd.timing('.getavgsurge.timing.latency', Date.now() - averageSurgeStart);
   let mappedSurge = averageSurge.map(obj => obj.rows[0]);
+  let avgDriversStart = Date.now();
   let averageDrivers = await db.getAvgDrivers(cities.cities);
+  statsd.timing('.getavgdrivers.timing.latency', Date.now() - avgDriversStart);
   let mappedDrivers = averageDrivers.map(obj => obj.rows[0]);
   mappedSurge.forEach(row => {
     packageData[row.city] = {
@@ -176,8 +205,12 @@ let packagePricingServiceData = async () => {
     })
   })
 
-  sendMessage(packageData, queue.pricingoutbox).then(console.log('Package Data Sent off'));
+  sendMessage(packageData, queue.pricingoutbox).then(() => {
+    console.log('Package Data Sent off');
+    statsd.timing('.packagedata.timing.latency', Date.now() - packageStart);
+  });
 }
+packagePricingServiceData();
 
 cron.schedule('*/1 * * * *', () => {
   console.log('Packaging Pricing Data')
