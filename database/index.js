@@ -7,8 +7,8 @@ const config = require('../config.json');
 
 
 const client = new cassandra.Client({
-    // contactPoints: ['172.31.12.186'], 
-    contactPoints: ['127.0.0.1'],
+    contactPoints: ['172.31.12.186'], 
+    // contactPoints: ['127.0.0.1'],
     keyspace: 'eventlogger'
 });
 

@@ -46,7 +46,7 @@ const pricingInbox = Consumer.create({
       let log = JSON.parse(message.Body);
       db.insertPricingLogs(log.userId, log.city, log.surgeMultiplier, log.price, log.priceTimestamp)
         .then(results => { 
-          statsd.timing('.pricinginbox.timing.latency', Date.now() - start)
+          statsd.timing('.pricinginbox.timing.latency', Date.now() - start, .25)
           console.log('Pricing Log Insert Completed')
       });
     }
@@ -64,7 +64,7 @@ const rideMatchingInbox = Consumer.create({
       let log = JSON.parse(message.Body);
       db.insertDriverLogs(log.userId, log.city, log.priceTimestamp)
       .then(results => {
-        statsd.timing('.ridematching.timing.latency', Date.now() - start)
+        statsd.timing('.ridematching.timing.latency', Date.now() - start, .25)
         console.log('Ridematching insert completed')
       });
     }
